@@ -1,0 +1,7 @@
+# The name is the app's, so the copied scripts' package:tabhand/ imports resolve here.
+name: tabhand
+description: Source lists and converter of Tabhand's ad-blocking rules (GPLv3 Corresponding Source).
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
