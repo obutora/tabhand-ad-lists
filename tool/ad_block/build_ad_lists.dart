@@ -9,7 +9,9 @@
 /// its rules. The update flow around this is tool/ad_block/update_ad_lists.sh
 /// (assets/ad_block/README.md「リストを更新する」).
 ///
-/// The app never fetches lists itself: new lists come with an app update.
+/// The app never fetches these lists itself: new ones come with an app
+/// update. (足した広告リスト, #1056, are fetched by the device from the
+/// address the user gave, and converted there with the same converter.)
 library;
 
 import 'dart:convert';

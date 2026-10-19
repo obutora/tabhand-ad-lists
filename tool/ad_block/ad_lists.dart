@@ -5,7 +5,7 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-import 'ad_list_converter.dart';
+import 'package:tabhand/ad_block/ad_list_converter.dart';
 
 /// A list the app bundles: where it comes from, under what license, and for
 /// which OS.
@@ -59,7 +59,10 @@ Map<String, String> buildBundledFiles(
   final iosSkipped = Map.of(iosRules.skipped);
   final ios = webKitRuleLists(iosRules, maxRulesPerList: maxRulesPerList, skipped: iosSkipped);
   final androidRules = parse(listsFor('android'));
-  final android = androidFiles(androidRules);
+  final header = [
+    for (final list in listsFor('android')) '# ${list.title} ${_version(sources[list.id]!.text)} (${list.license})',
+  ].join('\n');
+  final android = androidFileTexts(androidRules, about: header);
 
   int ruleLines(String file) => file.split('\n').where((l) => l.isNotEmpty && !l.startsWith('#')).length;
   Map<String, int> sorted(Map<String, int> counts) => {
@@ -90,18 +93,11 @@ Map<String, String> buildBundledFiles(
     },
   };
 
-  final header = [
-    for (final list in listsFor('android')) '# ${list.title} ${_version(sources[list.id]!.text)} (${list.license})',
-  ].join('\n');
   return {
     'ad_lists.json': '${const JsonEncoder.withIndent('  ').convert(metadata)}\n',
-    for (var i = 0; i < ios.length; i++) 'ios/rules-${i + 1}.json': '[\n${ios[i].map(jsonEncode).join(',\n')}\n]\n',
-    'android/network.tsv':
-        '# Tabhand 広告ブロック, network rules (format 1; see ../README.md)\n$header\n'
-        '# action\thost\ttoken\tregex\ttypes\tparty\tdomains\tflags\n${android.network}',
-    'android/cosmetic.tsv':
-        '# Tabhand 広告ブロック, cosmetic rules (format 1; see ../README.md)\n$header\n'
-        '# kind\tdomains\tselector\n${android.cosmetic}',
+    for (var i = 0; i < ios.length; i++) 'ios/rules-${i + 1}.json': webKitListJson(ios[i]),
+    'android/network.tsv': android.network,
+    'android/cosmetic.tsv': android.cosmetic,
   };
 }
 

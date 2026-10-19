@@ -1,10 +1,16 @@
 /// Converts ad lists in the Adblock Plus / AdGuard syntax (EasyList, AdGuard
-/// Japanese filter) into what the app bundles for 広告ブロック (#1050): the
-/// `WKContentRuleList` JSON iOS compiles, and the two TSV files the Android
-/// matcher reads. Only what the lists say with requests and plain CSS
-/// selectors is kept; scriptlets and other rules that need JavaScript are
-/// dropped (ADR 0012, ADR 0013). See assets/ad_block/README.md.
+/// Japanese filter) into what 広告ブロック reads: the `WKContentRuleList`
+/// JSON iOS compiles, and the two TSV files the Android matcher reads. Only
+/// what the lists say with requests and plain CSS selectors is kept;
+/// scriptlets and other rules that need JavaScript are dropped (ADR 0012,
+/// ADR 0013). See assets/ad_block/README.md.
+///
+/// Pure Dart, so both use the same code: tool/ad_block/ makes the bundled
+/// lists with it (#1050), and the app converts 足した広告リスト on the
+/// device (#1056, lib/ad_block/added_ad_lists.dart).
 library;
+
+import 'dart:convert';
 
 /// The request types of the lists, in the order both outputs write them.
 /// `document` is a top-level page; `subdocument` a frame.
@@ -594,4 +600,22 @@ bool _isPageException(NetworkRule rule) => rule.allow && rule.types?.length == 1
     cosmetic.writeln('nogeneric\t$host\t');
   }
   return (network: network.toString(), cosmetic: cosmetic.toString());
+}
+
+/// One `WKContentRuleList` as the file iOS compiles: a rule a line.
+String webKitListJson(List<Map<String, Object?>> list) => '[\n${list.map(jsonEncode).join(',\n')}\n]\n';
+
+/// [androidFiles] as the Android matcher reads them: each with the format's
+/// header line, [about] (comment lines of where the rules come from), and
+/// the names of the columns.
+({String network, String cosmetic}) androidFileTexts(RuleSet rules, {required String about}) {
+  final files = androidFiles(rules);
+  return (
+    network:
+        '# Tabhand 広告ブロック, network rules (format 1; see ../README.md)\n$about\n'
+        '# action\thost\ttoken\tregex\ttypes\tparty\tdomains\tflags\n${files.network}',
+    cosmetic:
+        '# Tabhand 広告ブロック, cosmetic rules (format 1; see ../README.md)\n$about\n'
+        '# kind\tdomains\tselector\n${files.cosmetic}',
+  );
 }

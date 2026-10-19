@@ -22,7 +22,7 @@ Tabhand の Android の規則のファイル（`network.tsv`・`cosmetic.tsv`）
 | `tool/ad_block/sources/fetched_on.json` | それぞれを取ってきた日（UTC） |
 | `tool/ad_block/build_ad_lists.dart` | 流すスクリプト |
 | `tool/ad_block/ad_lists.dart` | リストの一覧（元・ライセンス・使う OS）と、出力のファイルの組み立て |
-| `tool/ad_block/ad_list_converter.dart` | 変換。Adblock Plus / AdGuard の書き方から、Android の TSV と iOS の `WKContentRuleList` の JSON に |
+| `lib/ad_block/ad_list_converter.dart` | 変換（Tabhand のアプリも同じものを使う）。Adblock Plus / AdGuard の書き方から、Android の TSV と iOS の `WKContentRuleList` の JSON に |
 
 Android の規則は EasyList と AdGuard Japanese filter の両方から作るので、両方を置いている。iOS の規則は EasyList だけから作り、AdGuard Japanese filter は入らない。
 
@@ -55,13 +55,13 @@ dart run tool/ad_block/build_ad_lists.dart
 
 - AdGuard Japanese filter: Copyright AdGuard (https://adguard.com/) and the contributors of https://github.com/AdguardTeam/AdguardFilters 。GPLv3。
 - EasyList: Copyright The EasyList authors (https://easylist.to/)。GPLv3 以降か CC BY-SA 3.0 以降の選択（https://easylist.to/pages/licence.html）。ここでは GPLv3 で配る。
-- 変換のスクリプト（`tool/ad_block/*.dart`）: Copyright obutora。GPLv3。
+- 変換のスクリプト（`tool/ad_block/*.dart` と `lib/ad_block/ad_list_converter.dart`）: Copyright obutora。GPLv3。
 
 ## English
 
 The source lists and converter scripts of the rules Tabhand (a mobile browser with a built-in AI agent) uses for ad blocking on Android. Those rules include rules converted from AdGuard Japanese filter (GPLv3), so this repository is their Corresponding Source under GPLv3 section 6.
 
 - **Versions**: see the table under 「版」 above. The header lines of Tabhand's Android rule files name the list versions they were made from. This repository is updated whenever Tabhand replaces its lists; earlier versions are in the history (each commit message names the versions).
-- **Contents**: `tool/ad_block/sources/` holds EasyList and AdGuard Japanese filter as fetched, unmodified, with the fetch dates in `fetched_on.json`. The Android rules are made from both lists; the iOS rules from EasyList only. `tool/ad_block/*.dart` is the converter. It keeps network rules and plain CSS hiding rules and drops rules that need JavaScript or that the output format cannot express.
+- **Contents**: `tool/ad_block/sources/` holds EasyList and AdGuard Japanese filter as fetched, unmodified, with the fetch dates in `fetched_on.json`. The Android rules are made from both lists; the iOS rules from EasyList only. `tool/ad_block/*.dart` and `lib/ad_block/ad_list_converter.dart` are the converter. It keeps network rules and plain CSS hiding rules and drops rules that need JavaScript or that the output format cannot express.
 - **Rebuilding**: with Dart SDK 3.12 or later (no Flutter needed), run `dart run tool/ad_block/build_ad_lists.dart` at the top of this repository. It writes `assets/ad_block/`; `android/network.tsv` and `android/cosmetic.tsv` are byte-for-byte the files in Tabhand's Android app (`assets/flutter_assets/assets/ad_block/android/` in the APK). Add `--fetch` to fetch the lists anew first.
 - **License**: GNU General Public License version 3 (`LICENSE`). AdGuard Japanese filter is GPLv3 (AdGuard and the contributors of AdguardFilters). EasyList is GPLv3 or later, or CC BY-SA 3.0 or later, at the user's option (The EasyList authors); it is distributed here under GPLv3. The converter scripts are Copyright obutora, GPLv3.
